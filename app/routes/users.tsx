@@ -8,10 +8,10 @@ export const loader = ({ request }: LoaderArgs) => {
   return json({});
 };
 
-export default function DeckLayoutRoute() {
+export default function UsersLayoutRoute() {
   return (
     <>
-      <h1>Deck Layout Route</h1>
+      <h1>Users Layout Route</h1>
       <Outlet />
     </>
   );
