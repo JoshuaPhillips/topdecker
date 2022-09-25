@@ -1,4 +1,4 @@
-// Use this to delete a user by their email
+// Use this to delete a user by their username
 // Simply call this with:
 // npx ts-node --require tsconfig-paths/register ./cypress/support/delete-user.ts username@example.com
 // and that user will get deleted
@@ -10,17 +10,13 @@ import { prisma } from "~/services/db.server";
 
 installGlobals();
 
-const deleteUser = async (email: string) => {
-  if (!email) {
-    throw new Error("email required for login");
-  }
-
-  if (!email.endsWith("@example.com")) {
-    throw new Error("All test emails must end in @example.com");
+const deleteUser = async (username: string) => {
+  if (!username) {
+    throw new Error("username required for login");
   }
 
   try {
-    await prisma.user.delete({ where: { email } });
+    await prisma.user.delete({ where: { username } });
   } catch (error) {
     const isUserNotFoundError =
       error instanceof PrismaClientKnownRequestError && error.code === "P2025";

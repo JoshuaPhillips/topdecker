@@ -12,16 +12,12 @@ import { createUserSession } from "~/services/session.server";
 
 installGlobals();
 
-const createAndLogin = async (email: string) => {
-  if (!email) {
-    throw new Error("email required for login");
+const createAndLogin = async (username: string) => {
+  if (!username) {
+    throw new Error("username required for login");
   }
 
-  if (!email.endsWith("@example.com")) {
-    throw new Error("All test emails must end in @example.com");
-  }
-
-  const user = await createUser(email, "myreallystrongpassword");
+  const user = await createUser(username, "myreallystrongpassword");
 
   const response = await createUserSession({
     request: new Request("test://test"),

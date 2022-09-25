@@ -46,7 +46,7 @@ export const useMatchesData = (
 };
 
 const isUser = (user: any): user is User => {
-  return user && typeof user === "object" && typeof user.email === "string";
+  return user && typeof user === "object" && typeof user.username === "string";
 };
 
 export const useOptionalUser = (): User | undefined => {
@@ -69,8 +69,4 @@ export const useUser = (): User => {
   }
 
   return maybeUser;
-};
-
-export const validateEmail = (email: unknown): email is string => {
-  return typeof email === "string" && email.length > 3 && email.includes("@");
 };

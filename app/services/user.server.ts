@@ -9,28 +9,31 @@ export const getUserById = async (id: User["id"]) => {
   return prisma.user.findUnique({ where: { id } });
 };
 
-export const getUserByEmail = async (email: User["email"]) => {
-  return prisma.user.findUnique({ where: { email } });
+export const getUserByUsername = async (username: User["username"]) => {
+  return prisma.user.findUnique({ where: { username } });
 };
 
-export const createUser = async (email: User["email"], password: string) => {
+export const createUser = async (
+  username: User["username"],
+  password: string
+) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   return prisma.user.create({
-    data: { email, password: { create: { hash: hashedPassword } } },
+    data: { username, password: { create: { hash: hashedPassword } } },
   });
 };
 
-export const deleteUserByEmail = async (email: User["email"]) => {
-  return prisma.user.delete({ where: { email } });
+export const deleteUserByUsername = async (username: User["username"]) => {
+  return prisma.user.delete({ where: { username } });
 };
 
 export const verifyLogin = async (
-  email: User["email"],
+  username: User["username"],
   password: Password["hash"]
 ) => {
   const userWithPassword = await prisma.user.findUnique({
-    where: { email },
+    where: { username },
     include: { password: true },
   });
 

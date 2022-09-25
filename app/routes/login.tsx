@@ -5,7 +5,7 @@ import * as React from "react";
 
 import { createUserSession, getUserId } from "~/services/session.server";
 import { verifyLogin } from "~/services/user.server";
-import { safeRedirect, validateEmail } from "~/utils";
+import { safeRedirect } from "~/utils";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -16,37 +16,44 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
+  const username = formData.get("username");
   const password = formData.get("password");
   const redirectTo = safeRedirect(formData.get("redirectTo"), "/decks");
   const remember = formData.get("remember");
 
-  if (!validateEmail(email)) {
+  if (typeof username !== "string" || username.length === 0) {
     return json(
-      { errors: { email: "Email is invalid", password: null } },
+      { errors: { username: "Username is required", password: null } },
+      { status: 400 }
+    );
+  }
+
+  if (username.length < 8) {
+    return json(
+      { errors: { username: "Username is too short", password: null } },
       { status: 400 }
     );
   }
 
   if (typeof password !== "string" || password.length === 0) {
     return json(
-      { errors: { email: null, password: "Password is required" } },
+      { errors: { username: null, password: "Password is required" } },
       { status: 400 }
     );
   }
 
   if (password.length < 8) {
     return json(
-      { errors: { email: null, password: "Password is too short" } },
+      { errors: { username: null, password: "Password is too short" } },
       { status: 400 }
     );
   }
 
-  const user = await verifyLogin(email, password);
+  const user = await verifyLogin(username, password);
 
   if (!user) {
     return json(
-      { errors: { email: "Invalid email or password", password: null } },
+      { errors: { username: "Invalid username or password", password: null } },
       { status: 400 }
     );
   }
@@ -65,12 +72,12 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/decks";
   const actionData = useActionData<typeof action>();
-  const emailRef = React.useRef<HTMLInputElement>(null);
+  const usernameRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (actionData?.errors?.email) {
-      emailRef.current?.focus();
+    if (actionData?.errors?.username) {
+      usernameRef.current?.focus();
       return;
     }
 
@@ -85,29 +92,29 @@ export default function LoginPage() {
         <Form method="post" className="space-y-6">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
-              Email address
+              Username
             </label>
 
             <div className="mt-1">
               <input
-                ref={emailRef}
-                id="email"
+                ref={usernameRef}
+                id="username"
                 required
                 autoFocus={true}
-                name="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
+                name="username"
+                type="username"
+                autoComplete="username"
+                aria-invalid={actionData?.errors?.username ? true : undefined}
+                aria-describedby="username-error"
                 className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
               />
 
-              {actionData?.errors?.email && (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
+              {actionData?.errors?.username && (
+                <div className="pt-1 text-red-700" id="username-error">
+                  {actionData.errors.username}
                 </div>
               )}
             </div>
