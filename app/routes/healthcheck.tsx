@@ -3,9 +3,8 @@ import type { LoaderArgs } from "@remix-run/node";
 
 import { prisma } from "~/db.server";
 
-export async function loader({ request }: LoaderArgs) {
-  const host =
-    request.headers.get("X-Forwarded-Host") ?? request.headers.get("host");
+export const loader = async ({ request: { headers } }: LoaderArgs) => {
+  const host = headers.get("X-Forwarded-Host") ?? headers.get("host");
 
   try {
     const url = new URL("/", `http://${host}`);
@@ -17,9 +16,11 @@ export async function loader({ request }: LoaderArgs) {
         if (!r.ok) return Promise.reject(r);
       }),
     ]);
+
     return new Response("OK");
   } catch (error: unknown) {
     console.log("healthcheck ❌", { error });
+
     return new Response("ERROR", { status: 500 });
   }
-}
+};

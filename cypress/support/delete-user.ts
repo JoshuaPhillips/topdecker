@@ -10,10 +10,11 @@ import { prisma } from "~/db.server";
 
 installGlobals();
 
-async function deleteUser(email: string) {
+const deleteUser = async (email: string) => {
   if (!email) {
     throw new Error("email required for login");
   }
+
   if (!email.endsWith("@example.com")) {
     throw new Error("All test emails must end in @example.com");
   }
@@ -21,17 +22,18 @@ async function deleteUser(email: string) {
   try {
     await prisma.user.delete({ where: { email } });
   } catch (error) {
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
+    const isUserNotFoundError =
+      error instanceof PrismaClientKnownRequestError && error.code === "P2025";
+
+    if (isUserNotFoundError) {
       console.log("User not found, so no need to delete");
-    } else {
-      throw error;
+      return;
     }
+
+    throw error;
   } finally {
     await prisma.$disconnect();
   }
-}
+};
 
 deleteUser(process.argv[2]);

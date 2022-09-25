@@ -8,13 +8,14 @@ import { getUserId, createUserSession } from "~/session.server";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { safeRedirect, validateEmail } from "~/utils";
 
-export async function loader({ request }: LoaderArgs) {
+export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId) return redirect("/");
-  return json({});
-}
 
-export async function action({ request }: ActionArgs) {
+  return json({});
+};
+
+export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
@@ -54,21 +55,12 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const user = await createUser(email, password);
+  const { id: userId } = await createUser(email, password);
 
-  return createUserSession({
-    request,
-    userId: user.id,
-    remember: false,
-    redirectTo,
-  });
-}
-
-export const meta: MetaFunction = () => {
-  return {
-    title: "Sign Up",
-  };
+  return createUserSession({ request, userId, remember: false, redirectTo });
 };
+
+export const meta: MetaFunction = () => ({ title: "Sign Up" });
 
 export default function Join() {
   const [searchParams] = useSearchParams();
@@ -80,7 +72,10 @@ export default function Join() {
   React.useEffect(() => {
     if (actionData?.errors?.email) {
       emailRef.current?.focus();
-    } else if (actionData?.errors?.password) {
+      return;
+    }
+
+    if (actionData?.errors?.password) {
       passwordRef.current?.focus();
     }
   }, [actionData]);
@@ -96,6 +91,7 @@ export default function Join() {
             >
               Email address
             </label>
+
             <div className="mt-1">
               <input
                 ref={emailRef}
@@ -109,6 +105,7 @@ export default function Join() {
                 aria-describedby="email-error"
                 className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
               />
+
               {actionData?.errors?.email && (
                 <div className="pt-1 text-red-700" id="email-error">
                   {actionData.errors.email}
@@ -124,6 +121,7 @@ export default function Join() {
             >
               Password
             </label>
+
             <div className="mt-1">
               <input
                 id="password"
@@ -135,6 +133,7 @@ export default function Join() {
                 aria-describedby="password-error"
                 className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
               />
+
               {actionData?.errors?.password && (
                 <div className="pt-1 text-red-700" id="password-error">
                   {actionData.errors.password}
@@ -150,15 +149,13 @@ export default function Join() {
           >
             Create Account
           </button>
+
           <div className="flex items-center justify-center">
             <div className="text-center text-sm text-gray-500">
               Already have an account?{" "}
               <Link
                 className="text-blue-500 underline"
-                to={{
-                  pathname: "/login",
-                  search: searchParams.toString(),
-                }}
+                to={{ pathname: "/login", search: searchParams.toString() }}
               >
                 Log in
               </Link>
