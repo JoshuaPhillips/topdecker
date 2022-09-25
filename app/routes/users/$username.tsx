@@ -1,21 +1,19 @@
 import type { LoaderArgs, MetaFunction } from "@remix-run/node";
 
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 
-export const meta: MetaFunction = () => ({ title: "User ID Route" });
+export const meta: MetaFunction = () => ({ title: "Username Layout Route" });
 
-export const loader = async ({ request, params }: LoaderArgs) => {
-  return json({ username: params.username });
+export const loader = async ({ request }: LoaderArgs) => {
+  return json({});
 };
 
-export default function UsernameRoute() {
-  const loaderData = useLoaderData<typeof loader>();
-
+export default function UsernameLayoutRoute() {
   return (
     <>
-      <h1>Username Route</h1>
-      <pre>{JSON.stringify(loaderData, null, 2)}</pre>
+      <h1>Username Layout Route</h1>
+      <Outlet />
     </>
   );
 }
