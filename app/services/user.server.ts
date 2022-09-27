@@ -24,8 +24,15 @@ export const createUser = async (
   });
 };
 
-export const deleteUserByUsername = async (username: User["username"]) => {
-  return prisma.user.delete({ where: { username } });
+export const updateUserById = async (
+  id: User["id"],
+  data: Omit<User, "id" | "username" | "createdAt" | "updatedAt">
+) => {
+  return prisma.user.update({ where: { id }, data });
+};
+
+export const deleteUserById = async (id: User["id"]) => {
+  return prisma.user.delete({ where: { id } });
 };
 
 export const verifyLogin = async (

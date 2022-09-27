@@ -7,11 +7,14 @@ export const getDeckById = async (id: Deck["id"]) => {
   return prisma.deck.findUnique({ where: { id } });
 };
 
-export const createDeck = async (name: Deck["name"]) => {
-  return prisma.deck.findUnique({
-    where: { name },
-    include: { cards: { select: { scryfallId: true } } },
-  });
+export const getDeckByName = async (name: Deck["name"]) => {
+  return prisma.deck.findUnique({ where: { name } });
+};
+
+export const createDeck = async (
+  data: Omit<Deck, "id" | "createdAt" | "updatedAt">
+) => {
+  return prisma.deck.create({ data });
 };
 
 export const updateDeckById = async (
