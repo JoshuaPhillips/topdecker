@@ -7,10 +7,6 @@ export const getDeckById = async (id: Deck["id"]) => {
   return prisma.deck.findUnique({ where: { id } });
 };
 
-export const getDeckByName = async (name: Deck["name"]) => {
-  return prisma.deck.findUnique({ where: { name } });
-};
-
 export const createDeck = async (
   data: Omit<Deck, "id" | "createdAt" | "updatedAt">
 ) => {

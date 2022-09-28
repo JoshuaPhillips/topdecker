@@ -13,6 +13,7 @@ model User {
 
   firstName String?
   lastName String?
+  avatarUrl String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -30,19 +31,20 @@ model Password {
 
 model Deck {
   id   String @id @default(cuid())
-  name String @unique
+  name String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  User  User   @relation(fields: [owner], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  owner String
+  User  User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
 
   cards Card[]
 }
 
 model Card {
-  scryfallId String @id
+  id String @id @default(cuid())
+  scryfallId String
 
   deck   Deck   @relation(fields: [deckId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   deckId String
