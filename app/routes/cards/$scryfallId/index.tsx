@@ -14,7 +14,7 @@ export default function CardIdRoute() {
 
   return (
     <>
-      <h1>Card ID Layout Route</h1>
+      <h1>Card ID Index Route</h1>
       <pre>{JSON.stringify(params, null, 2)}</pre>
     </>
   );

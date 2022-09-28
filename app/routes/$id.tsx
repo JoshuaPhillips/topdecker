@@ -15,5 +15,5 @@ export const loader = async ({ request, params }: LoaderArgs) => {
 
   // check for a match in Card ID
 
-  return redirect("/decks");
+  return redirect("/");
 };
