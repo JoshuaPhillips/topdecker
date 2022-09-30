@@ -31,7 +31,7 @@ const seed = async () => {
   await prisma.user.deleteMany({ where: {} });
   await prisma.deck.deleteMany({ where: {} });
 
-  //  create a stable / consistent user for testing / development
+  // create a stable / consistent user for testing / development
   await prisma.user.create({
     data: {
       username,

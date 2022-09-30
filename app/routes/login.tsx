@@ -5,11 +5,11 @@ import * as React from "react";
 
 import { createUserSession, getUserId } from "~/services/session.server";
 import { verifyLogin } from "~/services/user.server";
-import { safeRedirect } from "~/utils";
+import { getSafeRedirect } from "~/utilities/utils";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
-  if (userId) return redirect("/");
+  if (userId) return redirect("/me");
 
   return json({});
 };
@@ -18,7 +18,7 @@ export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const username = formData.get("username");
   const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/decks");
+  const redirectTo = getSafeRedirect(formData.get("redirectTo"), "/me");
   const remember = formData.get("remember");
 
   if (typeof username !== "string" || username.length === 0) {
@@ -70,7 +70,7 @@ export const meta: MetaFunction = () => ({ title: "Login" });
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/decks";
+  const redirectTo = searchParams.get("redirectTo") || "/me";
   const actionData = useActionData<typeof action>();
   const usernameRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);

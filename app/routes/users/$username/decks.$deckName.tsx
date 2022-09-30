@@ -4,7 +4,7 @@ import { useLoaderData } from "@remix-run/react";
 
 export const meta: MetaFunction = () => ({ title: "Deck Name Route" });
 
-export const loader = ({ request, params }: LoaderArgs) => {
+export const loader = ({ params }: LoaderArgs) => {
   return json({ params });
 };
 

@@ -49,6 +49,7 @@ export const requireUserId = async (
 
   if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+
     throw redirect(`/login?${searchParams}`);
   }
 

@@ -6,11 +6,11 @@ import * as React from "react";
 import { getUserId, createUserSession } from "~/services/session.server";
 
 import { createUser, getUserByUsername } from "~/services/user.server";
-import { safeRedirect } from "~/utils";
+import { getSafeRedirect } from "~/utilities/utils";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
-  if (userId) return redirect("/");
+  if (userId) return redirect("/me");
 
   return json({});
 };
@@ -19,7 +19,7 @@ export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const username = formData.get("username");
   const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
+  const redirectTo = getSafeRedirect(formData.get("redirectTo"), "/");
 
   if (typeof username !== "string" || username.length === 0) {
     return json(

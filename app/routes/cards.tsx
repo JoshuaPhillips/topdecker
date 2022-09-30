@@ -5,8 +5,8 @@ import { Outlet } from "@remix-run/react";
 
 export const meta: MetaFunction = () => ({ title: "Card Layout Route" });
 
-export const loader = async ({ request, params }: LoaderArgs) => {
-  return json({ username: params.username });
+export const loader = async ({ request }: LoaderArgs) => {
+  return json({});
 };
 
 export default function CardLayoutRoute() {
