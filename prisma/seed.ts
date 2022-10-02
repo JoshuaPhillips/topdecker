@@ -11,21 +11,21 @@ const numberOfUsers = 50;
 const numberOfUsersWithDecks = 40;
 
 const minFollowersPerUser = 0;
-const maxFollowersPerUser = 2;
+const maxFollowersPerUser = 10;
 
 const minFollowingPerUser = 0;
-const maxFollowingPerUser = 3;
+const maxFollowingPerUser = 10;
 
 const minDecksPerUser = 0;
 const maxDecksPerUser = 5;
 
 const numberOfCardsPages = 4;
 
-const minCardsPerDeck = 10;
+const minCardsPerDeck = 0;
 const maxCardsPerDeck = 40;
 
 const minRatingsPerDeck = 0;
-const maxRatingsPerDeck = 5;
+const maxRatingsPerDeck = 10;
 
 const reset = async () => prisma.user.deleteMany({ where: {} });
 
@@ -68,41 +68,31 @@ const getRandomCards = async () => {
     .map((card) => card.id);
 };
 
-const setupFollowerNetwork = async (users: User[]) => {
-  await Promise.all(
+const addFollowerNetworkToUsers = async (users: User[]) => {
+  return Promise.all(
     users.map(async (user) => {
+      const otherUsers = users.filter(({ username }) => username !== user.username);
+
       const followers = faker.helpers.arrayElements(
-        users.filter(({ username }) => username !== user.username),
+        otherUsers,
         faker.datatype.number({ min: minFollowersPerUser, max: maxFollowersPerUser })
       );
 
-      if (followers.length === 0) return Promise.resolve(user);
-
-      return prisma.user.update({
-        where: { username: user.username },
-        data: {
-          followers: {
-            connect: followers.map(({ username }) => ({ username })),
-          },
-        },
-      });
-    })
-  );
-
-  return Promise.all(
-    users.map(async (user) => {
       const following = faker.helpers.arrayElements(
         users.filter(({ username }) => username !== user.username),
         faker.datatype.number({ min: minFollowingPerUser, max: maxFollowingPerUser })
       );
 
-      if (following.length === 0) return Promise.resolve(user);
+      if (followers.length === 0 && following.length === 0) return Promise.resolve(user);
 
       return prisma.user.update({
         where: { username: user.username },
         data: {
           following: {
             connect: following.map(({ username }) => ({ username })),
+          },
+          followers: {
+            connect: followers.map(({ username }) => ({ username })),
           },
         },
       });
@@ -114,17 +104,17 @@ const addDecksToUsers = async (users: User[], cardIds: string[]) => {
   const usersWithDecks = faker.helpers.arrayElements(users, numberOfUsersWithDecks);
 
   return Promise.all(
-    usersWithDecks.map(async ({ id: ownerId }) => {
+    usersWithDecks.map(async (user) => {
       const deckCount = faker.datatype.number({ min: minDecksPerUser, max: maxDecksPerUser });
       const deckFormat = faker.helpers.arrayElement(deckFormats);
 
-      return Promise.all(
+      await Promise.all(
         Array.from({ length: deckCount }, async () => {
           return prisma.deck.create({
             data: {
               name: faker.company.name(),
               description: faker.datatype.boolean() ? faker.lorem.paragraph() : undefined,
-              ownerId,
+              ownerId: user.id,
               format: deckFormat,
               cards: {
                 create: Array.from(
@@ -161,7 +151,7 @@ const addDecksToUsers = async (users: User[], cardIds: string[]) => {
                   },
                   () => ({
                     rating: faker.datatype.number({ min: 1, max: 5 }),
-                    raterId: faker.helpers.arrayElement(users.filter(({ id }) => id !== ownerId))
+                    raterId: faker.helpers.arrayElement(users.filter(({ id }) => id !== user.id))
                       .id,
                   })
                 ),
@@ -170,6 +160,8 @@ const addDecksToUsers = async (users: User[], cardIds: string[]) => {
           });
         })
       );
+
+      return user;
     })
   );
 };
@@ -181,15 +173,10 @@ const createTestUser = async (users: User[], cardIds: string[]) => {
   const lastName = 'User';
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const followers = faker.helpers.arrayElements(
-    users.filter(({ username }) => username !== 'test-user'),
-    faker.datatype.number({ min: 1, max: 3 })
-  );
+  const decks = await prisma.deck.findMany({ where: {}, take: 10 });
 
-  const following = faker.helpers.arrayElements(
-    users.filter(({ username }) => username !== 'test-user'),
-    faker.datatype.number({ min: 1, max: 2 })
-  );
+  const followers = faker.helpers.arrayElements(users, faker.datatype.number({ min: 1, max: 3 }));
+  const following = faker.helpers.arrayElements(users, faker.datatype.number({ min: 1, max: 2 }));
 
   return prisma.user.create({
     data: {
@@ -199,6 +186,12 @@ const createTestUser = async (users: User[], cardIds: string[]) => {
       bio: faker.lorem.paragraph(),
       avatarUrl: faker.image.avatar(),
       password: { create: { hash: hashedPassword } },
+      ratings: {
+        create: Array.from({ length: 10 }, (_, index) => ({
+          deckId: decks[index].id,
+          rating: faker.datatype.number({ min: 1, max: 5 }),
+        })),
+      },
       decks: {
         create: Array.from({ length: 5 }, () => {
           const deckFormat = faker.helpers.arrayElement(deckFormats);
@@ -259,8 +252,8 @@ const seed = async () => {
     const users = await createUsers();
     const randomCards = await getRandomCards();
 
-    await setupFollowerNetwork(users);
     await addDecksToUsers(users, randomCards);
+    await addFollowerNetworkToUsers(users);
     await createTestUser(users, randomCards);
   } catch (error) {
     console.error(error);
