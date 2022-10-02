@@ -21,14 +21,19 @@ export default function Index() {
           </li>
 
           {user ? (
-            <Link to="me">My Page</Link>
+            <li>
+              <Link to="me">My Page</Link>
+            </li>
           ) : (
-            <Link to="/login">Log In</Link>
+            <>
+              <li>
+                <Link to="/login">Log In</Link>
+              </li>
+              <li>
+                <Link to="/signup">Sign Up</Link>
+              </li>
+            </>
           )}
-
-          <li>
-            <Link to="/signup">Sign Up</Link>
-          </li>
 
           <li>
             <Link to="/cards/random">Random Card</Link>
