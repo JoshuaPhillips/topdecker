@@ -22,8 +22,8 @@ model User {
   password Password?
   decks Deck[]
 
-  followedBy User[]  @relation("UserFollows")
-  following  User[]  @relation("UserFollows")
+  followers User[]  @relation("FollowersFollowing")
+  following  User[]  @relation("FollowersFollowing")
 }
 
 model Password {
